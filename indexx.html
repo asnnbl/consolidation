@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Калькулятор партии посылок</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fa;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 15px;
+        }
+
+        .calculator {
+            background: #fff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0 0 8px;
+            font-size: 28px;
+            color: #111827;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        /* Общий фактический вес */
+
+        .actual-weight-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .actual-weight-box label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .actual-weight-box p {
+            margin: 0 0 12px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .actual-weight-box input {
+            width: 100%;
+            max-width: 350px;
+            padding: 13px;
+            border: 1px solid #93c5fd;
+            border-radius: 9px;
+            font-size: 17px;
+            outline: none;
+        }
+
+        .actual-weight-box input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Таблица */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 13px 8px;
+            text-align: center;
+            font-size: 13px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td input {
+            width: 100%;
+            min-width: 80px;
+            padding: 10px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        td input:focus {
+            border-color: #2563eb;
+        }
+
+        .number {
+            font-weight: 700;
+            color: #6b7280;
+        }
+
+        .volume-result {
+            font-weight: 700;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        .delete-btn {
+            border: none;
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 9px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Кнопки */
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 13px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #059669;
+        }
+
+        .calculate-btn {
+            background: #2563eb;
+            color: white;
+            flex: 1;
+        }
+
+        .calculate-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .clear-btn {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .clear-btn:hover {
+            background: #d1d5db;
+        }
+
+        /* Ошибка */
+
+        .error {
+            display: none;
+            margin-top: 18px;
+            padding: 13px;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+        }
+
+        /* Результат */
+
+        .result {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result h2 {
+            margin-bottom: 15px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .result-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-card span {
+            display: block;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .result-card strong {
+            font-size: 25px;
+            color: #111827;
+        }
+
+        .main-result {
+            grid-column: 1 / -1;
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        .main-result span {
+            color: rgba(255,255,255,0.85);
+        }
+
+        .main-result strong {
+            color: white;
+            font-size: 38px;
+        }
+
+        /* Информация */
+
+        .info {
+            margin-top: 25px;
+            padding: 18px;
+            background: #f9fafb;
+            border-radius: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .info strong {
+            color: #374151;
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                margin: 15px auto;
+                padding: 10px;
+            }
+
+            .calculator {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-result {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="calculator">
+
+        <h1>Калькулятор партии посылок</h1>
+
+        <div class="subtitle">
+            Разные размеры посылок + один общий фактический вес
+        </div>
+
+
+        <!-- ОБЩИЙ ФАКТИЧЕСКИЙ ВЕС -->
+
+        <div class="actual-weight-box">
+
+            <label for="totalActualWeight">
+                Общий фактический вес всей партии (кг)
+            </label>
+
+            <p>
+                Поставьте все посылки вместе на весы и укажите полученный вес.
+            </p>
+
+            <input
+                type="number"
+                id="totalActualWeight"
+                min="0"
+                step="0.01"
+                placeholder="Например: 87"
+            >
+
+        </div>
+
+
+        <!-- ТАБЛИЦА ПОСЫЛОК -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>№</th>
+                        <th>Длина<br>см</th>
+                        <th>Ширина<br>см</th>
+                        <th>Высота<br>см</th>
+                        <th>Мест</th>
+                        <th>Объёмный вес<br>кг</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="parcelTable"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- КНОПКИ -->
+
+        <div class="buttons">
+
+            <button
+                class="add-btn"
+                onclick="addParcel()"
+            >
+                + Добавить посылку
+            </button>
+
+            <button
+                class="calculate-btn"
+                onclick="calculate()"
+            >
+                Рассчитать
+            </button>
+
+            <button
+                class="clear-btn"
+                onclick="clearAll()"
+            >
+                Очистить
+            </button>
+
+        </div>
+
+
+        <!-- ОШИБКА -->
+
+        <div
+            class="error"
+            id="error"
+        ></div>
+
+
+        <!-- РЕЗУЛЬТАТ -->
+
+        <div
+            class="result"
+            id="result"
+        >
+
+            <h2>Результат расчёта</h2>
+
+            <div class="result-grid">
+
+                <div class="result-card">
+
+                    <span>
+                        Количество посылок
+                    </span>
+
+                    <strong id="parcelCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span>
+                        Общий фактический вес
+                    </span>
+
+                    <strong id="actualResult">
+                        0 кг
+                    </strong>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span>
+                        Общий объёмный вес
+                    </span>
+
+                    <strong id="volumeResult">
+                        0 кг
+                    </strong>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span>
+                        Платный вес до округления
+                    </span>
+
+                    <strong id="beforeRoundResult">
+                        0 кг
+                    </strong>
+
+                </div>
+
+
+                <div class="result-card main-result">
+
+                    <span>
+                        ИТОГОВЫЙ ПЛАТНЫЙ ВЕС
+                    </span>
+
+                    <strong id="chargeableResult">
+                        0 кг
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ФОРМУЛА -->
+
+        <div class="info">
+
+            <strong>Как считается:</strong>
+
+            <br><br>
+
+            1. Для каждой посылки отдельно считается объёмный вес:
+
+            <br>
+
+            Длина × Ширина × Высота / 6000 × Количество мест
+
+            <br><br>
+
+            2. Все объёмные веса посылок складываются.
+
+            <br><br>
+
+            3. Общий платный вес до округления =
+            максимальное значение между:
+
+            <br>
+
+            <strong>
+                общим фактическим весом
+                и
+                общим объёмным весом.
+            </strong>
+
+            <br><br>
+
+            4. После этого применяется округление:
+
+            <br>
+
+            0,01–0,49 → до 0,50 кг
+
+            <br>
+
+            0,50 → без изменений
+
+            <br>
+
+            0,51–0,99 → до следующего целого кг
+
+            <br>
+
+            0,00 → без изменений
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let parcelCount = 0;
+
+
+    /*
+     * ОКРУГЛЕНИЕ
+     *
+     * 12.00 → 12.00
+     * 12.01 → 12.50
+     * 12.49 → 12.50
+     * 12.50 → 12.50
+     * 12.51 → 13.00
+     * 12.99 → 13.00
+     */
+
+    function roundWeight(weight) {
+
+        const integerPart = Math.floor(weight);
+
+        const decimalPart =
+            Math.round(
+                (weight - integerPart) * 100
+            ) / 100;
+
+
+        // .00
+        if (decimalPart === 0) {
+            return integerPart;
+        }
+
+
+        // .50
+        if (decimalPart === 0.50) {
+            return integerPart + 0.50;
+        }
+
+
+        // .01 - .49
+        if (
+            decimalPart >= 0.01 &&
+            decimalPart <= 0.49
+        ) {
+            return integerPart + 0.50;
+        }
+
+
+        // .51 - .99
+        if (
+            decimalPart >= 0.51 &&
+            decimalPart <= 0.99
+        ) {
+            return integerPart + 1;
+        }
+
+
+        return weight;
+    }
+
+
+    /*
+     * Форматирование веса
+     */
+
+    function formatWeight(weight) {
+
+        return weight
+            .toFixed(2)
+            .replace(".", ",") + " кг";
+
+    }
+
+
+    /*
+     * ДОБАВИТЬ ПОСЫЛКУ
+     */
+
+    function addParcel() {
+
+        parcelCount++;
+
+        const table =
+            document.getElementById("parcelTable");
+
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td class="number">
+                ${parcelCount}
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="length"
+                    min="0"
+                    step="0.01"
+                    placeholder="60"
+                >
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="width"
+                    min="0"
+                    step="0.01"
+                    placeholder="40"
+                >
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="height"
+                    min="0"
+                    step="0.01"
+                    placeholder="50"
+                >
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="quantity"
+                    min="1"
+                    step="1"
+                    value="1"
+                >
+            </td>
+
+            <td class="volume-result">
+                —
+            </td>
+
+            <td>
+                <button
+                    class="delete-btn"
+                    onclick="deleteParcel(this)"
+                >
+                    ✕
+                </button>
+            </td>
+
+        `;
+
+
+        table.appendChild(row);
+
+        updateNumbers();
+
+    }
+
+
+    /*
+     * УДАЛИТЬ ПОСЫЛКУ
+     */
+
+    function deleteParcel(button) {
+
+        const row =
+            button.closest("tr");
+
+        row.remove();
+
+        updateNumbers();
+
+    }
+
+
+    /*
+     * НУМЕРАЦИЯ
+     */
+
+    function updateNumbers() {
+
+        const rows =
+            document.querySelectorAll(
+                "#parcelTable tr"
+            );
+
+
+        rows.forEach((row, index) => {
+
+            row.querySelector(".number")
+                .textContent = index + 1;
+
+        });
+
+
+        parcelCount = rows.length;
+
+    }
+
+
+    /*
+     * РАСЧЁТ
+     */
+
+    function calculate() {
+
+        const rows =
+            document.querySelectorAll(
+                "#parcelTable tr"
+            );
+
+
+        const actualWeight =
+            parseFloat(
+                document.getElementById(
+                    "totalActualWeight"
+                ).value
+            );
+
+
+        const error =
+            document.getElementById("error");
+
+        const result =
+            document.getElementById("result");
+
+
+        /*
+         * Проверяем общий фактический вес
+         */
+
+        if (
+            isNaN(actualWeight) ||
+            actualWeight < 0
+        ) {
+
+            error.textContent =
+                "Введите общий фактический вес всей партии.";
+
+            error.style.display = "block";
+
+            result.style.display = "none";
+
+            return;
+        }
+
+
+        /*
+         * Проверяем наличие посылок
+         */
+
+        if (rows.length === 0) {
+
+            error.textContent =
+                "Добавьте хотя бы одну посылку.";
+
+            error.style.display = "block";
+
+            result.style.display = "none";
+
+            return;
+        }
+
+
+        let totalVolumeWeight = 0;
+
+        let hasError = false;
+
+
+        /*
+         * Считаем каждую посылку
+         */
+
+        rows.forEach((row) => {
+
+            const length =
+                parseFloat(
+                    row.querySelector(".length").value
+                );
+
+            const width =
+                parseFloat(
+                    row.querySelector(".width").value
+                );
+
+            const height =
+                parseFloat(
+                    row.querySelector(".height").value
+                );
+
+            const quantity =
+                parseInt(
+                    row.querySelector(".quantity").value
+                );
+
+
+            /*
+             * Проверка размеров
+             */
+
+            if (
+                isNaN(length) ||
+                isNaN(width) ||
+                isNaN(height) ||
+                isNaN(quantity) ||
+
+                length <= 0 ||
+                width <= 0 ||
+                height <= 0 ||
+                quantity <= 0
+            ) {
+
+                hasError = true;
+
+                return;
+            }
+
+
+            /*
+             * Объёмный вес этой посылки
+             */
+
+            const volumeWeight =
+                (
+                    length *
+                    width *
+                    height
+                ) / 6000 * quantity;
+
+
+            /*
+             * Показываем результат
+             * в строке
+             */
+
+            row.querySelector(
+                ".volume-result"
+            ).textContent =
+                formatWeight(volumeWeight);
+
+
+            /*
+             * Добавляем к общему
+             */
+
+            totalVolumeWeight += volumeWeight;
+
+        });
+
+
+        /*
+         * Если есть ошибка
+         */
+
+        if (hasError) {
+
+            error.textContent =
+                "Проверьте размеры всех посылок. Длина, ширина, высота и количество мест должны быть заполнены.";
+
+            error.style.display = "block";
+
+            result.style.display = "none";
+
+            return;
+        }
+
+
+        error.style.display = "none";
+
+
+        /*
+         * ПЛАТНЫЙ ВЕС ДО ОКРУГЛЕНИЯ
+         *
+         * Берём максимум:
+         *
+         * общий фактический вес
+         * VS
+         * общий объёмный вес
+         */
+
+        const chargeableBefore =
+            Math.max(
+                actualWeight,
+                totalVolumeWeight
+            );
+
+
+        /*
+         * ОКРУГЛЁННЫЙ ПЛАТНЫЙ ВЕС
+         */
+
+        const finalChargeable =
+            roundWeight(
+                chargeableBefore
+            );
+
+
+        /*
+         * ВЫВОД
+         */
+
+        document.getElementById(
+            "parcelCount"
+        ).textContent =
+            rows.length;
+
+
+        document.getElementById(
+            "actualResult"
+        ).textContent =
+            formatWeight(actualWeight);
+
+
+        document.getElementById(
+            "volumeResult"
+        ).textContent =
+            formatWeight(totalVolumeWeight);
+
+
+        document.getElementById(
+            "beforeRoundResult"
+        ).textContent =
+            formatWeight(chargeableBefore);
+
+
+        document.getElementById(
+            "chargeableResult"
+        ).textContent =
+            formatWeight(finalChargeable);
+
+
+        result.style.display = "block";
+
+    }
+
+
+    /*
+     * ОЧИСТИТЬ
+     */
+
+    function clearAll() {
+
+        document.getElementById(
+            "parcelTable"
+        ).innerHTML = "";
+
+
+        document.getElementById(
+            "totalActualWeight"
+        ).value = "";
+
+
+        document.getElementById(
+            "result"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "error"
+        ).style.display = "none";
+
+
+        parcelCount = 0;
+
+
+        // Создаём первую строку
+
+        addParcel();
+
+    }
+
+
+    /*
+     * При запуске сайта
+     * создаём одну посылку
+     */
+
+    addParcel();
+
+</script>
+
+</body>
+</html>
